@@ -13,7 +13,8 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <Slider x:Name="slider" Maximum="1" SmallChange="0.001"/>
-        <h:HelixViewport3D Grid.Row="1" ZoomExtentsWhenLoaded="True" ShowCoordinateSystem="True" ShowViewCube="True">
+      
+        <h:HelixViewport3D Grid.Row="1" ZoomExtentsWhenLoaded="True" ShowCoordinateSystem="True">
             <h:HelixViewport3D.Camera>
                 <PerspectiveCamera LookDirection=" 5, 10, -10" UpDirection="0,1,0"/>
             </h:HelixViewport3D.Camera>
@@ -22,12 +23,14 @@
                     <AmbientLight Color="White"/>
                 </ModelVisual3D.Content>
             </ModelVisual3D>
-            <local:Section3DVisual3D x:Name="sectionVisual" Rectangle="0,0,0,1,1,1" SectionPosition="{Binding Value, ElementName=slider}" >
-                <local:Section3DVisual3D.SectionBrush>
-                    <!--<ImageBrush ImageSource="1200c.jpg"/>-->
-                    <SolidColorBrush Color="Azure"/>
-                </local:Section3DVisual3D.SectionBrush>
+            <local:Section3DVisual3D x:Name="sectionVisual" Rectangle="0,0,0,100,100,100"
+                                     SectionPosition="{Binding Value, ElementName=slider}">
+               <local:Section3DVisual3D.SectionBrush>
+                   <ImageBrush ImageSource="thumb.jpg"></ImageBrush>
+               </local:Section3DVisual3D.SectionBrush>
+
             </local:Section3DVisual3D>
+            <!--<local:SampleImageVisual3D X="300" Y="300" Z="900"  SectionPosition="{Binding Value, ElementName=slider}"/>-->
         </h:HelixViewport3D>
     </Grid>
 </Window>

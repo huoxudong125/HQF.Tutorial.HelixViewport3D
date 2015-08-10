@@ -120,6 +120,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="SampleImageVisual3D.cs" />
     <Compile Include="Section3DVisual3D.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -169,6 +170,13 @@
     <Resource Include="WIN_20150505_140318.JPG" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Back.png" />
+    <Resource Include="Bottom.png" />
+    <Resource Include="Front.png" />
+    <Resource Include="Left.png" />
+    <Resource Include="Top.png" />
+    <Resource Include="thumb.jpg" />
+    <Resource Include="Right.png" />
     <Content Include="sharpdx_direct3d11_effects_x64.dll" />
     <Content Include="sharpdx_direct3d11_effects_x86.dll" />
   </ItemGroup>
