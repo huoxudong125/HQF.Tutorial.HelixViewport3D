@@ -25,7 +25,7 @@
             </ModelVisual3D>
             <local:Section3DVisual3D x:Name="sectionVisual" Rectangle="0,0,0,100,100,100"
                                      SectionPosition="{Binding Value, ElementName=slider}"
-                                     CurrentDirection="Front">
+                                     CurrentDirection="Left">
                 <local:Section3DVisual3D.SectionBrush>
                     <ImageBrush ImageSource="thumb.jpg"></ImageBrush>
                 </local:Section3DVisual3D.SectionBrush>
