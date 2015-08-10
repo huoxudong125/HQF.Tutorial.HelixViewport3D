@@ -151,29 +151,24 @@ namespace WpfApplication1
                     CreateTopSelectionSlice(plotModel, SectionBrush);
                     CreateTopMinSlice(plotModel, TopBrush);
 
-                    //CreateFrontPartSlice(plotModel, FrontBrush, SectionPosition);
-                    //CreateLeftPartSlice(plotModel, LeftBrush, SectionPosition);
-                    //CreateTopMaxSlice(plotModel, new sysMedia.SolidColorBrush(sysMedia.Colors.Transparent));
+                    CreateFrontPartSlice(plotModel, FrontBrush, SectionPosition);
+                    CreateLeftPartSlice(plotModel, LeftBrush, SectionPosition);
                     break;
 
                 case FrameDirection.Front:
                     CreateFrontSelectionSlice(plotModel, SectionBrush);
                     CreateFrontMinSlice(plotModel, FrontBrush);
-
-                    CreateLeftPartSlice(plotModel, LeftBrush, SectionPosition);
-                    CreateTopPartSlice(plotModel, TopBrush, SectionPosition);
-                    //CreateFrontMaxSlice(plotModel, new sysMedia.SolidColorBrush(sysMedia.Colors.Transparent));
+                    CreateFrontPartSlice(plotModel, FrontBrush, SectionPosition);
+                  
                     break;
 
                 case FrameDirection.Left:
                     CreateLeftSelectionSlice(plotModel, SectionBrush);
                     CreateLeftMinSlice(plotModel, LeftBrush);
 
-                    //CreateFrontPartSlice(plotModel, FrontBrush, SectionPosition);
-                    //CreateTopPartSlice(plotModel, TopBrush, SectionPosition);
-                    //CreateLeftMaxSlice(plotModel, new sysMedia.SolidColorBrush(sysMedia.Colors.Transparent));
+                    CreateFrontPartSlice(plotModel, FrontBrush, SectionPosition);
+                    CreateTopPartSlice(plotModel, TopBrush, SectionPosition);
                     break;
-
                 default:
                     throw new InvalidOperationException("Can not process the direction.");
             }
@@ -373,6 +368,65 @@ namespace WpfApplication1
 
         private void CreateFrontPartSlice(Model3DGroup plotModel, sysMedia.Brush brush, double position)
         {
+            var leftImageBrush = ClipImageBrush(brush, new Rect(0, 0, Rectangle.SizeX / _maxLength, position));
+            var sectionMeshBuilder = new MeshBuilder();
+            sectionMeshBuilder.AddRectangularMesh(
+                new[]
+                {
+                    new Point3D(0, 0, Rectangle.SizeZ/_maxLength),
+                    new Point3D(position, 0, Rectangle.SizeZ/_maxLength),
+                    new Point3D(0, 0, 0),
+                    new Point3D(position, 0, 0)
+                }, 2);
+            plotModel.Children.Add(new GeometryModel3D(sectionMeshBuilder.ToMesh(),
+                MaterialHelper.CreateMaterial(leftImageBrush)));
+
+            sectionMeshBuilder = new MeshBuilder();
+            sectionMeshBuilder.AddRectangularMesh(
+                new[]
+                {
+                    new Point3D(position, Rectangle.SizeY/_maxLength, Rectangle.SizeZ/_maxLength),
+                    new Point3D(0, Rectangle.SizeY/_maxLength, Rectangle.SizeZ/_maxLength),
+                    new Point3D(position, Rectangle.SizeY/_maxLength, 0),
+                    new Point3D(0, Rectangle.SizeY/_maxLength, 0)
+                }, 2);
+
+            var bgBrush = FilpImageBrush(leftImageBrush);
+            plotModel.Children.Add(new GeometryModel3D(sectionMeshBuilder.ToMesh(),
+                MaterialHelper.CreateMaterial(bgBrush)));
+
+
+            var topImageBrush = ClipImageBrush(brush, new Rect(0, 0, Rectangle.SizeZ / _maxLength, position));
+            sectionMeshBuilder = new MeshBuilder();
+            sectionMeshBuilder.AddRectangularMesh(
+                new[]
+                {
+                    new Point3D(0, Rectangle.SizeY/_maxLength, Rectangle.SizeZ/_maxLength),
+                    new Point3D(position, Rectangle.SizeY/_maxLength, Rectangle.SizeZ/_maxLength),
+                    new Point3D(0, 0, Rectangle.SizeZ/_maxLength),
+                    new Point3D(position, 0, Rectangle.SizeZ/_maxLength)
+                }, 2);
+            plotModel.Children.Add(new GeometryModel3D(sectionMeshBuilder.ToMesh(),
+                MaterialHelper.CreateMaterial(topImageBrush)));
+
+            sectionMeshBuilder = new MeshBuilder();
+            sectionMeshBuilder.AddRectangularMesh(
+                new[]
+                {
+                    new Point3D(position, Rectangle.SizeY/_maxLength, 0),
+                    new Point3D(0, Rectangle.SizeY/_maxLength, 0),
+                    new Point3D(position, 0, 0),
+                    new Point3D(0, 0, 0)
+                }, 2);
+
+            bgBrush = FilpImageBrush(topImageBrush);
+            plotModel.Children.Add(new GeometryModel3D(sectionMeshBuilder.ToMesh(),
+                MaterialHelper.CreateMaterial(bgBrush)));
+          
+        }
+
+        private void CreateLeftPartSlice(Model3DGroup plotModel, sysMedia.Brush brush, double position)
+        {
             var sectionMeshBuilder = new MeshBuilder();
             sectionMeshBuilder.AddRectangularMesh(
                 new[]
@@ -400,67 +454,9 @@ namespace WpfApplication1
                 MaterialHelper.CreateMaterial(bgBrush)));
         }
 
-        private void CreateLeftPartSlice(Model3DGroup plotModel, sysMedia.Brush brush, double position)
-        {
-            var imgBrush = ClipImageBrush(brush, new Rect(0, 0, Rectangle.SizeX / _maxLength, position));
-            var sectionMeshBuilder = new MeshBuilder();
-            sectionMeshBuilder.AddRectangularMesh(
-                new[]
-                {
-                    new Point3D(0, 0, Rectangle.SizeZ/_maxLength),
-                    new Point3D(position, 0, Rectangle.SizeZ/_maxLength),
-                    new Point3D(0,0, 0),
-                    new Point3D(position,0, 0)
-                }, 2);
-            plotModel.Children.Add(new GeometryModel3D(sectionMeshBuilder.ToMesh(),
-                MaterialHelper.CreateMaterial(imgBrush)));
-
-            sectionMeshBuilder = new MeshBuilder();
-            sectionMeshBuilder.AddRectangularMesh(
-                new[]
-                {
-                    new Point3D(position, Rectangle.SizeY/_maxLength, Rectangle.SizeZ/_maxLength),
-                    new Point3D(0,Rectangle.SizeY/_maxLength, Rectangle.SizeZ/_maxLength),
-                    new Point3D(position, Rectangle.SizeY/_maxLength, 0),
-                    new Point3D(0, Rectangle.SizeY/_maxLength, 0)
-                }, 2);
-
-            var bgBrush = FilpImageBrush(imgBrush);
-            plotModel.Children.Add(new GeometryModel3D(sectionMeshBuilder.ToMesh(),
-                MaterialHelper.CreateMaterial(bgBrush)));
-        }
-
         private void CreateTopPartSlice(Model3DGroup plotModel, sysMedia.Brush brush, double position)
         {
-         
-
-
-            var imgBrush = ClipImageBrush(brush, new Rect(0, 0, Rectangle.SizeZ / _maxLength, position));
-            var sectionMeshBuilder = new MeshBuilder();
-            sectionMeshBuilder.AddRectangularMesh(
-                new[]
-                {
-                    new Point3D(0, Rectangle.SizeY/_maxLength, Rectangle.SizeZ/_maxLength),
-                    new Point3D(position,  Rectangle.SizeY/_maxLength, Rectangle.SizeZ/_maxLength),
-                    new Point3D(0, 0, Rectangle.SizeZ/_maxLength),
-                    new Point3D(position, 0, Rectangle.SizeZ/_maxLength)
-                }, 2);
-            plotModel.Children.Add(new GeometryModel3D(sectionMeshBuilder.ToMesh(),
-                MaterialHelper.CreateMaterial(imgBrush)));
-
-            sectionMeshBuilder = new MeshBuilder();
-            sectionMeshBuilder.AddRectangularMesh(
-                new[]
-                {
-                    new Point3D(position, Rectangle.SizeY/_maxLength, 0),
-                    new Point3D(0, Rectangle.SizeY/_maxLength, 0),
-                    new Point3D(position, 0, 0),
-                    new Point3D(0, 0, 0)
-                }, 2);
-
-            var bgBrush = FilpImageBrush(imgBrush);
-            plotModel.Children.Add(new GeometryModel3D(sectionMeshBuilder.ToMesh(),
-                MaterialHelper.CreateMaterial(bgBrush)));
+           
         }
 
         #endregion Create all facets
