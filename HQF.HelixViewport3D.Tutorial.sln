@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Blend for Visual Studio 14
-VisualStudioVersion = 14.0.23107.0
+# Visual Studio 2013
+VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WpfApplication1", "WpfApplication1\WpfApplication1.csproj", "{28B17A9C-A9CB-4C1C-B3E1-4EE24EA4EE98}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HQF.HelixViewport3D.Cube", "WpfApplication1\HQF.HelixViewport3D.Cube.csproj", "{28B17A9C-A9CB-4C1C-B3E1-4EE24EA4EE98}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

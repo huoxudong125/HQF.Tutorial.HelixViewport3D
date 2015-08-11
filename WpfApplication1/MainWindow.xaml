@@ -10,8 +10,8 @@
         Title="MainWindow" Height="350" Width="525" Background="Black">
     <Window.Resources>
         <ObjectDataProvider MethodName="GetValues"
-                        ObjectType="{x:Type sys:Enum}"
-                        x:Key="DirectionValues">
+                            ObjectType="{x:Type sys:Enum}"
+                            x:Key="DirectionValues">
             <ObjectDataProvider.MethodParameters>
                 <x:Type TypeName="local:FrameDirection" />
             </ObjectDataProvider.MethodParameters>
@@ -24,14 +24,15 @@
         </Grid.RowDefinitions>
         <StackPanel>
             <WrapPanel>
-                <ComboBox Name="myComboBox" SelectedIndex="0"  Width="80"
+                <ComboBox Name="myComboBox" SelectedIndex="0" Width="80"
                           ItemsSource="{Binding Source={StaticResource DirectionValues} }"
-                          SelectedItem="{Binding  ElementName=sectionVisual,Path=CurrentDirection}" Margin="4"/>
-                <Slider x:Name="slider" Maximum="1" SmallChange="0.001"  Width="300"  Margin="4"/>
+                          SelectedItem="{Binding  ElementName=sectionVisual,Path=CurrentDirection}" Margin="4" />
+                <Slider x:Name="slider" Maximum="1" SmallChange="0.001" Width="300" Margin="4" />
             </WrapPanel>
-          
+
         </StackPanel>
-        <h:HelixViewport3D x:Name="HelixViewport3D" Grid.Row="1" ZoomExtentsWhenLoaded="True" ShowCoordinateSystem="True">
+        <h:HelixViewport3D x:Name="HelixViewport3D" Grid.Row="1" ZoomExtentsWhenLoaded="True"
+                           ShowCoordinateSystem="True">
             <h:HelixViewport3D.Camera>
                 <PerspectiveCamera LookDirection=" 5, 10, -10" UpDirection="0,1,0" />
             </h:HelixViewport3D.Camera>
@@ -44,28 +45,27 @@
                                      SectionPosition="{Binding Value, ElementName=slider}"
                                      CurrentDirection="Top">
                 <local:Section3DVisual3D.SectionBrush>
-                    <ImageBrush ImageSource="thumb.jpg"></ImageBrush>
+                    <ImageBrush ImageSource="Resources/thumb.jpg" />
                 </local:Section3DVisual3D.SectionBrush>
                 <local:Section3DVisual3D.LeftBrush>
-                    <ImageBrush ImageSource="Left.png"></ImageBrush>
+                    <ImageBrush ImageSource="Resources/Left.png" />
                 </local:Section3DVisual3D.LeftBrush>
                 <local:Section3DVisual3D.RightBrush>
-                    <ImageBrush ImageSource="Right.png" />
+                    <ImageBrush ImageSource="Resources/Right.png" />
                 </local:Section3DVisual3D.RightBrush>
                 <local:Section3DVisual3D.TopBrush>
-                    <ImageBrush ImageSource="Top.png"></ImageBrush>
+                    <ImageBrush ImageSource="Resources/Top.png" />
                 </local:Section3DVisual3D.TopBrush>
                 <local:Section3DVisual3D.BottomBrush>
-                    <ImageBrush ImageSource="Bottom.png"></ImageBrush>
+                    <ImageBrush ImageSource="Resources/Bottom.png" />
                 </local:Section3DVisual3D.BottomBrush>
                 <local:Section3DVisual3D.FrontBrush>
-                    <ImageBrush ImageSource="Front.png"></ImageBrush>
+                    <ImageBrush ImageSource="Resources/Front.png" />
                 </local:Section3DVisual3D.FrontBrush>
                 <local:Section3DVisual3D.BackBrush>
-                    <ImageBrush ImageSource="Back.png"></ImageBrush>
+                    <ImageBrush ImageSource="Resources/Back.png" />
                 </local:Section3DVisual3D.BackBrush>
             </local:Section3DVisual3D>
-            <!--<local:SampleImageVisual3D X="300" Y="300" Z="900"  SectionPosition="{Binding Value, ElementName=slider}" />-->
         </h:HelixViewport3D>
     </Grid>
 </Window>

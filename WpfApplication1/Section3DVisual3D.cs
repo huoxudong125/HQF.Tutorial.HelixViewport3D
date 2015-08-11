@@ -442,8 +442,8 @@ namespace WpfApplication1
                 new[]
                 {
                     new Point3D(Rectangle.SizeX/_maxLength, position, 0),
-                    new Point3D( 0,position, 0),
-                    new Point3D(Rectangle.SizeX/_maxLength,0, 0),
+                    new Point3D(0, position, 0),
+                    new Point3D(Rectangle.SizeX/_maxLength, 0, 0),
                     new Point3D(0, 0, 0)
                 }, 2);
 
@@ -492,7 +492,7 @@ namespace WpfApplication1
             sectionMeshBuilder.AddRectangularMesh(
                 new[]
                 {
-                    new Point3D(0, 0,position),
+                    new Point3D(0, 0, position),
                     new Point3D(Rectangle.SizeX/_maxLength, 0, position),
                     new Point3D(0, 0, 0),
                     new Point3D(Rectangle.SizeX/_maxLength, 0, 0)
@@ -505,9 +505,9 @@ namespace WpfApplication1
                 new[]
                 {
                     new Point3D(Rectangle.SizeX/_maxLength, Rectangle.SizeY/_maxLength, position),
-                    new Point3D( 0, Rectangle.SizeY/_maxLength, position),
+                    new Point3D(0, Rectangle.SizeY/_maxLength, position),
                     new Point3D(Rectangle.SizeX/_maxLength, Rectangle.SizeY/_maxLength, 0),
-                    new Point3D(0,  Rectangle.SizeY/_maxLength, 0)
+                    new Point3D(0, Rectangle.SizeY/_maxLength, 0)
                 }, 2);
 
             var bgBrush = FilpImageBrush(brush);
@@ -534,9 +534,9 @@ namespace WpfApplication1
             sectionMeshBuilder.AddRectangularMesh(
                 new[]
                 {
-                    new Point3D(0, Rectangle.SizeY/_maxLength,position),
+                    new Point3D(0, Rectangle.SizeY/_maxLength, position),
                     new Point3D(0, 0, position),
-                    new Point3D(0,  Rectangle.SizeY/_maxLength, 0),
+                    new Point3D(0, Rectangle.SizeY/_maxLength, 0),
                     new Point3D(0, 0, 0)
                 }, 2);
 
