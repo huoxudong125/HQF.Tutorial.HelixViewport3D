@@ -5,16 +5,33 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfApplication1"
         xmlns:h="http://helix-toolkit.org/wpf"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
         Title="MainWindow" Height="350" Width="525" Background="Black">
+    <Window.Resources>
+        <ObjectDataProvider MethodName="GetValues"
+                        ObjectType="{x:Type sys:Enum}"
+                        x:Key="DirectionValues">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="local:FrameDirection" />
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+    </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <Slider x:Name="slider" Maximum="1" SmallChange="0.001" />
-
-        <h:HelixViewport3D Grid.Row="1" ZoomExtentsWhenLoaded="True" ShowCoordinateSystem="True">
+        <StackPanel>
+            <WrapPanel>
+                <ComboBox Name="myComboBox" SelectedIndex="0"  Width="80"
+                          ItemsSource="{Binding Source={StaticResource DirectionValues} }"
+                          SelectedItem="{Binding  ElementName=sectionVisual,Path=CurrentDirection}" Margin="4"/>
+                <Slider x:Name="slider" Maximum="1" SmallChange="0.001"  Width="300"  Margin="4"/>
+            </WrapPanel>
+          
+        </StackPanel>
+        <h:HelixViewport3D x:Name="HelixViewport3D" Grid.Row="1" ZoomExtentsWhenLoaded="True" ShowCoordinateSystem="True">
             <h:HelixViewport3D.Camera>
                 <PerspectiveCamera LookDirection=" 5, 10, -10" UpDirection="0,1,0" />
             </h:HelixViewport3D.Camera>

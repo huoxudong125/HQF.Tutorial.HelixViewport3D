@@ -177,8 +177,6 @@
     <Resource Include="Top.png" />
     <Resource Include="thumb.jpg" />
     <Resource Include="Right.png" />
-    <Content Include="sharpdx_direct3d11_effects_x64.dll" />
-    <Content Include="sharpdx_direct3d11_effects_x86.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
