@@ -3,9 +3,9 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:WpfApplication1"
         xmlns:h="http://helix-toolkit.org/wpf"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        xmlns:cube="clr-namespace:HQF.HelixViewport3D.Cube"
         mc:Ignorable="d"
         Title="MainWindow" Height="350" Width="525" Background="Black">
     <Window.Resources>
@@ -13,7 +13,7 @@
                             ObjectType="{x:Type sys:Enum}"
                             x:Key="DirectionValues">
             <ObjectDataProvider.MethodParameters>
-                <x:Type TypeName="local:FrameDirection" />
+                <x:Type TypeName="cube:FrameDirection" />
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
     </Window.Resources>
@@ -41,31 +41,31 @@
                     <AmbientLight Color="White" />
                 </ModelVisual3D.Content>
             </ModelVisual3D>
-            <local:Section3DVisual3D x:Name="sectionVisual" Rectangle="0,0,0,100,100,100"
+            <cube:Section3DVisual3D x:Name="sectionVisual" Rectangle="0,0,0,100,100,100"
                                      SectionPosition="{Binding Value, ElementName=slider}"
-                                     CurrentDirection="Top">
-                <local:Section3DVisual3D.SectionBrush>
+                                     CurrentDirection="Front">
+                <cube:Section3DVisual3D.SectionBrush>
                     <ImageBrush ImageSource="Resources/thumb.jpg" />
-                </local:Section3DVisual3D.SectionBrush>
-                <local:Section3DVisual3D.LeftBrush>
-                    <ImageBrush ImageSource="Resources/Left.png" />
-                </local:Section3DVisual3D.LeftBrush>
-                <local:Section3DVisual3D.RightBrush>
-                    <ImageBrush ImageSource="Resources/Right.png" />
-                </local:Section3DVisual3D.RightBrush>
-                <local:Section3DVisual3D.TopBrush>
-                    <ImageBrush ImageSource="Resources/Top.png" />
-                </local:Section3DVisual3D.TopBrush>
-                <local:Section3DVisual3D.BottomBrush>
-                    <ImageBrush ImageSource="Resources/Bottom.png" />
-                </local:Section3DVisual3D.BottomBrush>
-                <local:Section3DVisual3D.FrontBrush>
-                    <ImageBrush ImageSource="Resources/Front.png" />
-                </local:Section3DVisual3D.FrontBrush>
-                <local:Section3DVisual3D.BackBrush>
-                    <ImageBrush ImageSource="Resources/Back.png" />
-                </local:Section3DVisual3D.BackBrush>
-            </local:Section3DVisual3D>
+                </cube:Section3DVisual3D.SectionBrush>
+                <cube:Section3DVisual3D.LeftBrush>
+                    <ImageBrush ImageSource="Resources/Left_1.png" />
+                </cube:Section3DVisual3D.LeftBrush>
+                <cube:Section3DVisual3D.RightBrush>
+                    <ImageBrush ImageSource="Resources/Left_300.png" />
+                </cube:Section3DVisual3D.RightBrush>
+                <cube:Section3DVisual3D.TopBrush>
+                    <ImageBrush ImageSource="Resources/Top_1.png" />
+                </cube:Section3DVisual3D.TopBrush>
+                <cube:Section3DVisual3D.BottomBrush>
+                    <ImageBrush ImageSource="Resources/Top_300.png" />
+                </cube:Section3DVisual3D.BottomBrush>
+                <cube:Section3DVisual3D.FrontBrush>
+                    <ImageBrush ImageSource="Resources/Front_1.png" />
+                </cube:Section3DVisual3D.FrontBrush>
+                <cube:Section3DVisual3D.BackBrush>
+                    <ImageBrush ImageSource="Resources/Front_300.png" />
+                </cube:Section3DVisual3D.BackBrush>
+            </cube:Section3DVisual3D>
         </h:HelixViewport3D>
     </Grid>
 </Window>

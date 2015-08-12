@@ -110,9 +110,6 @@
     <Resource Include="Resources\1200c.jpg" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\WIN_20150505_140318.JPG" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Resources\Back.png" />
     <Resource Include="Resources\Bottom.png" />
     <Resource Include="Resources\Front.png" />
@@ -120,6 +117,14 @@
     <Resource Include="Resources\Top.png" />
     <Resource Include="Resources\thumb.jpg" />
     <Resource Include="Resources\Right.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Front_1.png" />
+    <Resource Include="Resources\Front_300.png" />
+    <Resource Include="Resources\Left_1.png" />
+    <Resource Include="Resources\Left_300.png" />
+    <Resource Include="Resources\Top_1.png" />
+    <Resource Include="Resources\Top_300.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

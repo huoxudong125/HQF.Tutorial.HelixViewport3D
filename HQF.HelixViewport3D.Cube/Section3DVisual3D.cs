@@ -4,10 +4,64 @@ using System.Windows.Media.Media3D;
 using HelixToolkit.Wpf;
 using sysMedia = System.Windows.Media;
 
-namespace WpfApplication1
+namespace HQF.HelixViewport3D.Cube
 {
     public class Section3DVisual3D : ModelVisual3D
     {
+        private readonly ModelVisual3D _visualChild;
+        private double _maxLength;
+
+        private static void ModelChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            ((Section3DVisual3D) d).UpdateModel();
+        }
+
+        private void UpdateModel()
+        {
+            _visualChild.Content = CreateModel();
+        }
+
+        private Model3D CreateModel()
+        {
+            var plotModel = new Model3DGroup();
+
+            var axesMeshBuilder = new MeshBuilder();
+
+            axesMeshBuilder.AddBoundingBox(GetSampleImageBox(), 0.01);
+
+            plotModel.Children.Add(new GeometryModel3D(axesMeshBuilder.ToMesh(), Materials.Yellow));
+
+            switch (CurrentDirection)
+            {
+                case FrameDirection.Top:
+                    CreateTopSelectionSlice(plotModel, SectionBrush);
+                    CreateTopMinSlice(plotModel, TopBrush);
+                    CreateTopPartSlice(plotModel, SectionPosition);
+                    break;
+
+                case FrameDirection.Front:
+                    CreateFrontSelectionSlice(plotModel, SectionBrush);
+                    CreateFrontMaxSlice(plotModel);
+                    CreateFrontPartSlice(plotModel, SectionPosition);
+
+                    break;
+
+                case FrameDirection.Left:
+                    CreateLeftSelectionSlice(plotModel, SectionBrush);
+                    CreateLeftMinSlice(plotModel);
+                    CreateLeftPartSlice(plotModel, SectionPosition);
+
+                    break;
+
+                default:
+                    throw new InvalidOperationException("Can not process the direction.");
+            }
+
+            return plotModel;
+        }
+
+        #region denpendcy propeties
+
         // Using a DependencyProperty as the backing store for Rectangle.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty RectangleProperty =
             DependencyProperty.Register("Rectangle", typeof (Rect3D), typeof (Section3DVisual3D),
@@ -52,8 +106,9 @@ namespace WpfApplication1
             DependencyProperty.Register("CurrentDirection", typeof (FrameDirection), typeof (Section3DVisual3D),
                 new PropertyMetadata(FrameDirection.Left, ModelChanged));
 
-        private readonly ModelVisual3D _visualChild;
-        private double _maxLength;
+        #endregion
+
+        #region properties
 
         public Section3DVisual3D()
         {
@@ -125,59 +180,39 @@ namespace WpfApplication1
             set { SetValue(CurrentDirectionProperty, value); }
         }
 
-        private static void ModelChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        #endregion
+
+        #region common functions
+
+        private sysMedia.Brush FilpAndRotateImageBrush(sysMedia.Brush brush)
         {
-            ((Section3DVisual3D) d).UpdateModel();
-        }
-
-        private void UpdateModel()
-        {
-            _visualChild.Content = CreateModel();
-        }
-
-        private Model3D CreateModel()
-        {
-            var plotModel = new Model3DGroup();
-
-            var axesMeshBuilder = new MeshBuilder();
-
-            axesMeshBuilder.AddBoundingBox(GetSampleImageBox(), 0.01);
-
-            plotModel.Children.Add(new GeometryModel3D(axesMeshBuilder.ToMesh(), Materials.Yellow));
-
-            switch (CurrentDirection)
+            var bgBrush = brush.Clone();
+            var transform = sysMedia.Matrix.Identity;
+            transform.RotateAt(180, 0.5, 0.5);
+            transform.ScaleAt(1, -1, 0.5, 0.5);
+            if (bgBrush is sysMedia.ImageBrush)
             {
-                case FrameDirection.Top:
-                    CreateTopSelectionSlice(plotModel, SectionBrush);
-                    CreateTopMinSlice(plotModel, TopBrush);
-                    CreateTopPartSlice(plotModel, TopBrush, SectionPosition);
-                    break;
-
-                case FrameDirection.Front:
-                    CreateFrontSelectionSlice(plotModel, SectionBrush);
-                    CreateFrontMinSlice(plotModel, FrontBrush);
-                    CreateFrontPartSlice(plotModel, FrontBrush, SectionPosition);
-
-                    break;
-
-                case FrameDirection.Left:
-                    CreateLeftSelectionSlice(plotModel, SectionBrush);
-                    CreateLeftMinSlice(plotModel, LeftBrush);
-                    CreateLeftPartSlice(plotModel, LeftBrush, SectionPosition);
-
-                    break;
-                default:
-                    throw new InvalidOperationException("Can not process the direction.");
+                bgBrush.RelativeTransform = new sysMedia.MatrixTransform(transform);
             }
+            return bgBrush;
+        }
 
-            return plotModel;
+        private sysMedia.Brush RotateImageBrush(sysMedia.Brush brush, int degree)
+        {
+            var bgBrush = brush.Clone();
+            var transform = sysMedia.Matrix.Identity;
+            transform.RotateAt(degree, 0.5, 0.5);
+            if (bgBrush is sysMedia.ImageBrush)
+            {
+                bgBrush.RelativeTransform = new sysMedia.MatrixTransform(transform);
+            }
+            return bgBrush;
         }
 
         private sysMedia.Brush FilpImageBrush(sysMedia.Brush brush)
         {
             var bgBrush = brush.Clone();
             var transform = sysMedia.Matrix.Identity;
-            transform.RotateAt(180, 0.5, 0.5);
             transform.ScaleAt(1, -1, 0.5, 0.5);
             if (bgBrush is sysMedia.ImageBrush)
             {
@@ -207,11 +242,20 @@ namespace WpfApplication1
             return sampleImageBox;
         }
 
+        #endregion
+
         #region selection
 
         private void CreateFrontSelectionSlice(Model3DGroup plotModel, sysMedia.Brush brush)
         {
-            CreateFrontSlice(plotModel, brush, SectionPosition);
+            if (SectionPosition == 0.0)
+            {
+                CreateFrontMinSlice(plotModel);
+            }
+            else
+            {
+                CreateFrontSlice(plotModel, brush, SectionPosition);
+            }
         }
 
         private void CreateLeftSelectionSlice(Model3DGroup plotModel, sysMedia.Brush brush)
@@ -228,14 +272,14 @@ namespace WpfApplication1
 
         #region Create all facets
 
-        private void CreateFrontMinSlice(Model3DGroup plotModel, sysMedia.Brush brush)
+        private void CreateFrontMinSlice(Model3DGroup plotModel)
         {
-            CreateFrontSlice(plotModel, brush, 0); //z=0 for helix top ,Raw Front==Helix Top;
+            CreateFrontSlice(plotModel, FrontBrush, 0); //z=0 for helix top ,Raw Front==Helix Top;
         }
 
-        private void CreateLeftMinSlice(Model3DGroup plotModel, sysMedia.Brush brush)
+        private void CreateLeftMinSlice(Model3DGroup plotModel)
         {
-            CreateLeftSlice(plotModel, brush, 0);
+            CreateLeftSlice(plotModel, LeftBrush, 0);
         }
 
         private void CreateTopMinSlice(Model3DGroup plotModel, sysMedia.Brush brush)
@@ -243,9 +287,9 @@ namespace WpfApplication1
             CreateTopSlice(plotModel, brush, 0);
         }
 
-        private void CreateFrontMaxSlice(Model3DGroup plotModel, sysMedia.Brush brush)
+        private void CreateFrontMaxSlice(Model3DGroup plotModel)
         {
-            CreateFrontSlice(plotModel, brush, Rectangle.SizeZ/_maxLength);
+            CreateFrontSlice(plotModel, BackBrush, Rectangle.SizeZ/_maxLength);
         }
 
         private void CreateTopMaxSlice(Model3DGroup plotModel, sysMedia.Brush brush)
@@ -263,9 +307,10 @@ namespace WpfApplication1
         /// </summary>
         /// <param name="plotModel"></param>
         /// <param name="brush"></param>
-        /// <param name="position"></param>
-        private void CreateFrontSlice(Model3DGroup plotModel, sysMedia.Brush brush, double position)
+        /// <param name="currentPosition"></param>
+        private void CreateFrontSlice(Model3DGroup plotModel, sysMedia.Brush brush, double currentPosition)
         {
+            var position = Rectangle.SizeX/_maxLength - currentPosition;
             var sectionMeshBuilder = new MeshBuilder();
             sectionMeshBuilder.AddRectangularMesh(
                 new[]
@@ -288,7 +333,7 @@ namespace WpfApplication1
                     new Point3D(position, 0, 0)
                 }, 2);
 
-            var bgBrush = FilpImageBrush(brush);
+            var bgBrush = FilpAndRotateImageBrush(brush);
             plotModel.Children.Add(new GeometryModel3D(sectionMeshBuilder.ToMesh(),
                 MaterialHelper.CreateMaterial(bgBrush)));
         }
@@ -298,9 +343,10 @@ namespace WpfApplication1
         /// </summary>
         /// <param name="plotModel"></param>
         /// <param name="brush"></param>
-        /// <param name="position"></param>
-        private void CreateLeftSlice(Model3DGroup plotModel, sysMedia.Brush brush, double position)
+        /// <param name="currentPosition"></param>
+        private void CreateLeftSlice(Model3DGroup plotModel, sysMedia.Brush brush, double currentPosition)
         {
+            var position = currentPosition;
             var sectionMeshBuilder = new MeshBuilder();
             sectionMeshBuilder.AddRectangularMesh(
                 new[]
@@ -323,7 +369,7 @@ namespace WpfApplication1
                     new Point3D(0, position, 0)
                 }, 2);
 
-            var bgBrush = FilpImageBrush(brush);
+            var bgBrush = FilpAndRotateImageBrush(brush);
             plotModel.Children.Add(new GeometryModel3D(sectionMeshBuilder.ToMesh(),
                 MaterialHelper.CreateMaterial(bgBrush)));
         }
@@ -333,9 +379,10 @@ namespace WpfApplication1
         /// </summary>
         /// <param name="plotModel"></param>
         /// <param name="brush"></param>
-        /// <param name="position"></param>
-        private void CreateTopSlice(Model3DGroup plotModel, sysMedia.Brush brush, double position)
+        /// <param name="currentPosition"></param>
+        private void CreateTopSlice(Model3DGroup plotModel, sysMedia.Brush brush, double currentPosition)
         {
+            var position = currentPosition;
             var sectionMeshBuilder = new MeshBuilder();
             sectionMeshBuilder.AddRectangularMesh(
                 new[]
@@ -358,14 +405,22 @@ namespace WpfApplication1
                     new Point3D(0, 0, position)
                 }, 2);
 
-            var bgBrush = FilpImageBrush(brush);
+            var bgBrush = FilpAndRotateImageBrush(brush);
             plotModel.Children.Add(new GeometryModel3D(sectionMeshBuilder.ToMesh(),
                 MaterialHelper.CreateMaterial(bgBrush)));
         }
 
-        private void CreateFrontPartSlice(Model3DGroup plotModel, sysMedia.Brush brush, double position)
+
+        #endregion Create all facets
+
+
+        private void CreateFrontPartSlice(Model3DGroup plotModel, double currentPosition)
         {
-            var leftImageBrush = ClipImageBrush(brush, new Rect(0, 0, Rectangle.SizeX/_maxLength, position));
+            var position = Rectangle.SizeX/_maxLength - currentPosition;
+
+            #region Left
+
+            var leftImageBrush = ClipImageBrush(LeftBrush, new Rect(0, 0, position, Rectangle.SizeZ/_maxLength));
             var sectionMeshBuilder = new MeshBuilder();
             sectionMeshBuilder.AddRectangularMesh(
                 new[]
@@ -388,12 +443,17 @@ namespace WpfApplication1
                     new Point3D(0, Rectangle.SizeY/_maxLength, 0)
                 }, 2);
 
-            var bgBrush = FilpImageBrush(leftImageBrush);
+            leftImageBrush = ClipImageBrush(RightBrush, new Rect(0, 0, position, Rectangle.SizeZ/_maxLength));
+            var bgBrush = FilpAndRotateImageBrush(leftImageBrush);
             plotModel.Children.Add(new GeometryModel3D(sectionMeshBuilder.ToMesh(),
                 MaterialHelper.CreateMaterial(bgBrush)));
 
+            #endregion Left
 
-            var topImageBrush = ClipImageBrush(brush, new Rect(0, 0, Rectangle.SizeZ/_maxLength, position));
+            #region Top
+
+            var topImageBrush = ClipImageBrush(TopBrush, new Rect(0, 0, Rectangle.SizeX/_maxLength, position));
+            topImageBrush = RotateImageBrush(topImageBrush, 270);
             sectionMeshBuilder = new MeshBuilder();
             sectionMeshBuilder.AddRectangularMesh(
                 new[]
@@ -407,24 +467,30 @@ namespace WpfApplication1
                 MaterialHelper.CreateMaterial(topImageBrush)));
 
             sectionMeshBuilder = new MeshBuilder();
+            //The 
             sectionMeshBuilder.AddRectangularMesh(
                 new[]
                 {
-                    new Point3D(position, Rectangle.SizeY/_maxLength, 0),
-                    new Point3D(0, Rectangle.SizeY/_maxLength, 0),
                     new Point3D(position, 0, 0),
-                    new Point3D(0, 0, 0)
+                    new Point3D(position, Rectangle.SizeY/_maxLength, 0),
+                    
+                    new Point3D(0, 0, 0),
+                    new Point3D(0, Rectangle.SizeY/_maxLength, 0)
                 }, 2);
 
+            topImageBrush = ClipImageBrush(BottomBrush, new Rect(0, 0, Rectangle.SizeX/_maxLength, position));
             bgBrush = FilpImageBrush(topImageBrush);
             plotModel.Children.Add(new GeometryModel3D(sectionMeshBuilder.ToMesh(),
                 MaterialHelper.CreateMaterial(bgBrush)));
+
+            #endregion Top
         }
 
-        private void CreateLeftPartSlice(Model3DGroup plotModel, sysMedia.Brush brush, double position)
+        private void CreateLeftPartSlice(Model3DGroup plotModel, double position)
         {
             #region Top
 
+            var topImageBrush = ClipImageBrush(TopBrush, new Rect(0, 0, Rectangle.SizeZ/_maxLength, position));
             var sectionMeshBuilder = new MeshBuilder();
             sectionMeshBuilder.AddRectangularMesh(
                 new[]
@@ -435,7 +501,7 @@ namespace WpfApplication1
                     new Point3D(Rectangle.SizeX/_maxLength, 0, Rectangle.SizeZ/_maxLength)
                 }, 2);
             plotModel.Children.Add(new GeometryModel3D(sectionMeshBuilder.ToMesh(),
-                MaterialHelper.CreateMaterial(brush)));
+                MaterialHelper.CreateMaterial(topImageBrush)));
 
             sectionMeshBuilder = new MeshBuilder();
             sectionMeshBuilder.AddRectangularMesh(
@@ -447,14 +513,16 @@ namespace WpfApplication1
                     new Point3D(0, 0, 0)
                 }, 2);
 
-            var bgBrush = FilpImageBrush(brush);
+            topImageBrush = ClipImageBrush(BottomBrush, new Rect(0, 0, Rectangle.SizeZ/_maxLength, position));
+            var bgBrush = FilpAndRotateImageBrush(topImageBrush);
             plotModel.Children.Add(new GeometryModel3D(sectionMeshBuilder.ToMesh(),
                 MaterialHelper.CreateMaterial(bgBrush)));
 
-            #endregion
+            #endregion Top
 
-            #region Left
+            #region Front
 
+            var frontImageBrush = ClipImageBrush(FrontBrush, new Rect(0, 0, Rectangle.SizeX/_maxLength, position));
             sectionMeshBuilder = new MeshBuilder();
             sectionMeshBuilder.AddRectangularMesh(
                 new[]
@@ -465,7 +533,7 @@ namespace WpfApplication1
                     new Point3D(Rectangle.SizeX/_maxLength, position, 0)
                 }, 2);
             plotModel.Children.Add(new GeometryModel3D(sectionMeshBuilder.ToMesh(),
-                MaterialHelper.CreateMaterial(brush)));
+                MaterialHelper.CreateMaterial(frontImageBrush)));
 
             sectionMeshBuilder = new MeshBuilder();
             sectionMeshBuilder.AddRectangularMesh(
@@ -477,16 +545,19 @@ namespace WpfApplication1
                     new Point3D(0, 0, 0)
                 }, 2);
 
-            bgBrush = FilpImageBrush(brush);
+            frontImageBrush = ClipImageBrush(BackBrush, new Rect(0, 0, Rectangle.SizeX/_maxLength, position));
+            bgBrush = FilpAndRotateImageBrush(frontImageBrush);
             plotModel.Children.Add(new GeometryModel3D(sectionMeshBuilder.ToMesh(),
                 MaterialHelper.CreateMaterial(bgBrush)));
 
-            #endregion
+            #endregion Front
         }
 
-        private void CreateTopPartSlice(Model3DGroup plotModel, sysMedia.Brush brush, double position)
+        private void CreateTopPartSlice(Model3DGroup plotModel, double position)
         {
             #region Left
+
+            var leftImageBrush = ClipImageBrush(LeftBrush, new Rect(0, 0, Rectangle.SizeX/_maxLength, position));
 
             var sectionMeshBuilder = new MeshBuilder();
             sectionMeshBuilder.AddRectangularMesh(
@@ -498,7 +569,7 @@ namespace WpfApplication1
                     new Point3D(Rectangle.SizeX/_maxLength, 0, 0)
                 }, 2);
             plotModel.Children.Add(new GeometryModel3D(sectionMeshBuilder.ToMesh(),
-                MaterialHelper.CreateMaterial(brush)));
+                MaterialHelper.CreateMaterial(leftImageBrush)));
 
             sectionMeshBuilder = new MeshBuilder();
             sectionMeshBuilder.AddRectangularMesh(
@@ -510,14 +581,16 @@ namespace WpfApplication1
                     new Point3D(0, Rectangle.SizeY/_maxLength, 0)
                 }, 2);
 
-            var bgBrush = FilpImageBrush(brush);
+            leftImageBrush = ClipImageBrush(RightBrush, new Rect(0, 0, Rectangle.SizeX/_maxLength, position));
+            var bgBrush = FilpAndRotateImageBrush(leftImageBrush);
             plotModel.Children.Add(new GeometryModel3D(sectionMeshBuilder.ToMesh(),
                 MaterialHelper.CreateMaterial(bgBrush)));
 
-            #endregion
+            #endregion Left
 
             #region Front
 
+            var frontImageBrush = ClipImageBrush(FrontBrush, new Rect(0, 0, Rectangle.SizeX/_maxLength, position));
             sectionMeshBuilder = new MeshBuilder();
             sectionMeshBuilder.AddRectangularMesh(
                 new[]
@@ -528,7 +601,7 @@ namespace WpfApplication1
                     new Point3D(Rectangle.SizeX/_maxLength, Rectangle.SizeY/_maxLength, 0)
                 }, 2);
             plotModel.Children.Add(new GeometryModel3D(sectionMeshBuilder.ToMesh(),
-                MaterialHelper.CreateMaterial(brush)));
+                MaterialHelper.CreateMaterial(frontImageBrush)));
 
             sectionMeshBuilder = new MeshBuilder();
             sectionMeshBuilder.AddRectangularMesh(
@@ -540,14 +613,15 @@ namespace WpfApplication1
                     new Point3D(0, 0, 0)
                 }, 2);
 
-            bgBrush = FilpImageBrush(brush);
+            frontImageBrush = ClipImageBrush(BackBrush, new Rect(0, 0, Rectangle.SizeX/_maxLength, position));
+            bgBrush = FilpAndRotateImageBrush(frontImageBrush);
             plotModel.Children.Add(new GeometryModel3D(sectionMeshBuilder.ToMesh(),
                 MaterialHelper.CreateMaterial(bgBrush)));
 
-            #endregion
+            #endregion Front
         }
 
-        #endregion Create all facets
+       
     }
 
     public enum FrameDirection
