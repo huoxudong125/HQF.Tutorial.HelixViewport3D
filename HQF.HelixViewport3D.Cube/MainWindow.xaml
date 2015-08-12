@@ -43,7 +43,7 @@
             </ModelVisual3D>
             <cube:Section3DVisual3D x:Name="sectionVisual" Rectangle="0,0,0,100,100,100"
                                      SectionPosition="{Binding Value, ElementName=slider}"
-                                     CurrentDirection="Front">
+                                     CurrentDirection="Top">
                 <cube:Section3DVisual3D.SectionBrush>
                     <ImageBrush ImageSource="Resources/thumb.jpg" />
                 </cube:Section3DVisual3D.SectionBrush>
