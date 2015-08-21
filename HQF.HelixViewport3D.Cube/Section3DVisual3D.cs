@@ -9,11 +9,10 @@ namespace HQF.HelixViewport3D.Cube
     public class Section3DVisual3D : ModelVisual3D
     {
         private readonly ModelVisual3D _visualChild;
-        private double _maxLength;
 
         private static void ModelChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            ((Section3DVisual3D) d).UpdateModel();
+            ((Section3DVisual3D)d).UpdateModel();
         }
 
         private void UpdateModel()
@@ -27,7 +26,8 @@ namespace HQF.HelixViewport3D.Cube
 
             var axesMeshBuilder = new MeshBuilder();
 
-            axesMeshBuilder.AddBoundingBox(GetSampleImageBox(), 0.01);
+            _realRect3D = GetSampleImageBox();
+            axesMeshBuilder.AddBoundingBox(_realRect3D, 0.01);
 
             plotModel.Children.Add(new GeometryModel3D(axesMeshBuilder.ToMesh(), Materials.Yellow));
 
@@ -62,17 +62,19 @@ namespace HQF.HelixViewport3D.Cube
 
         private void CreateFrontPartSlice(Model3DGroup plotModel, double currentPosition)
         {
-            var position = Rectangle.SizeX/_maxLength - currentPosition;
+            var position = (1 - currentPosition) * _realRect3D.SizeX;
+            if (position < 0.0)
+                return;
 
             #region Left
 
-            var leftImageBrush = ClipImageBrush(LeftBrush, new Rect(0, 0, position, Rectangle.SizeZ/_maxLength));
+            var leftImageBrush = ClipImageBrush(LeftBrush, new Rect(0, 0, 1 - currentPosition, 1));
             var sectionMeshBuilder = new MeshBuilder();
             sectionMeshBuilder.AddRectangularMesh(
                 new[]
                 {
-                    new Point3D(0, 0, Rectangle.SizeZ/_maxLength),
-                    new Point3D(position, 0, Rectangle.SizeZ/_maxLength),
+                    new Point3D(0, 0, _realRect3D.SizeZ),
+                    new Point3D(position, 0, _realRect3D.SizeZ),
                     new Point3D(0, 0, 0),
                     new Point3D(position, 0, 0)
                 }, 2);
@@ -83,13 +85,13 @@ namespace HQF.HelixViewport3D.Cube
             sectionMeshBuilder.AddRectangularMesh(
                 new[]
                 {
-                    new Point3D(position, Rectangle.SizeY/_maxLength, Rectangle.SizeZ/_maxLength),
-                    new Point3D(0, Rectangle.SizeY/_maxLength, Rectangle.SizeZ/_maxLength),
-                    new Point3D(position, Rectangle.SizeY/_maxLength, 0),
-                    new Point3D(0, Rectangle.SizeY/_maxLength, 0)
+                    new Point3D(position, _realRect3D.SizeY, _realRect3D.SizeZ),
+                    new Point3D(0, _realRect3D.SizeY, _realRect3D.SizeZ),
+                    new Point3D(position, _realRect3D.SizeY, 0),
+                    new Point3D(0, _realRect3D.SizeY, 0)
                 }, 2);
 
-            leftImageBrush = ClipImageBrush(RightBrush, new Rect(0, 0, position, Rectangle.SizeZ/_maxLength));
+            leftImageBrush = ClipImageBrush(RightBrush, new Rect(0, 0, 1 - currentPosition, 1));
             var bgBrush = FilpAndRotateImageBrush(leftImageBrush);
             plotModel.Children.Add(new GeometryModel3D(sectionMeshBuilder.ToMesh(),
                 MaterialHelper.CreateMaterial(bgBrush)));
@@ -98,16 +100,16 @@ namespace HQF.HelixViewport3D.Cube
 
             #region Top
 
-            var topImageBrush = ClipImageBrush(TopBrush, new Rect(0, 0, Rectangle.SizeX/_maxLength, position));
+            var topImageBrush = ClipImageBrush(TopBrush, new Rect(0, 0, 1, 1 - currentPosition));
             topImageBrush = RotateImageBrush(topImageBrush, 270);
             sectionMeshBuilder = new MeshBuilder();
             sectionMeshBuilder.AddRectangularMesh(
                 new[]
                 {
-                    new Point3D(0, Rectangle.SizeY/_maxLength, Rectangle.SizeZ/_maxLength),
-                    new Point3D(position, Rectangle.SizeY/_maxLength, Rectangle.SizeZ/_maxLength),
-                    new Point3D(0, 0, Rectangle.SizeZ/_maxLength),
-                    new Point3D(position, 0, Rectangle.SizeZ/_maxLength)
+                    new Point3D(0, _realRect3D.SizeY, _realRect3D.SizeZ),
+                    new Point3D(position, _realRect3D.SizeY, _realRect3D.SizeZ),
+                    new Point3D(0, 0, _realRect3D.SizeZ),
+                    new Point3D(position, 0, _realRect3D.SizeZ)
                 }, 2);
             plotModel.Children.Add(new GeometryModel3D(sectionMeshBuilder.ToMesh(),
                 MaterialHelper.CreateMaterial(topImageBrush)));
@@ -118,12 +120,12 @@ namespace HQF.HelixViewport3D.Cube
                 new[]
                 {
                     new Point3D(position, 0, 0),
-                    new Point3D(position, Rectangle.SizeY/_maxLength, 0),
+                    new Point3D(position, _realRect3D.SizeY, 0),
                     new Point3D(0, 0, 0),
-                    new Point3D(0, Rectangle.SizeY/_maxLength, 0)
+                    new Point3D(0, _realRect3D.SizeY, 0)
                 }, 2);
 
-            topImageBrush = ClipImageBrush(BottomBrush, new Rect(0, 0, Rectangle.SizeX/_maxLength, position));
+            topImageBrush = ClipImageBrush(BottomBrush, new Rect(0, 0, 1, 1 - currentPosition));
             bgBrush = FilpImageBrush(topImageBrush);
             plotModel.Children.Add(new GeometryModel3D(sectionMeshBuilder.ToMesh(),
                 MaterialHelper.CreateMaterial(bgBrush)));
@@ -133,20 +135,24 @@ namespace HQF.HelixViewport3D.Cube
 
         private void CreateTopPartSlice(Model3DGroup plotModel, double currentPosition)
         {
-            var position = Rectangle.SizeZ/_maxLength - currentPosition;
+            var position = (1 - currentPosition) * _realRect3D.SizeZ;
+
+            if (position < 0.0)
+                return;
 
             #region Left
 
-            var leftImageBrush = ClipImageBrush(LeftBrush, new Rect(0, currentPosition, Rectangle.SizeX/_maxLength, position));
+            var leftImageBrush = ClipImageBrush(LeftBrush,
+                new Rect(0, currentPosition, 1, 1 - currentPosition));
 
             var sectionMeshBuilder = new MeshBuilder();
             sectionMeshBuilder.AddRectangularMesh(
                 new[]
                 {
                     new Point3D(0, 0, position),
-                    new Point3D(Rectangle.SizeX/_maxLength, 0, position),
+                    new Point3D(_realRect3D.SizeX, 0, position),
                     new Point3D(0, 0, 0),
-                    new Point3D(Rectangle.SizeX/_maxLength, 0, 0)
+                    new Point3D(_realRect3D.SizeX, 0, 0)
                 }, 2);
             plotModel.Children.Add(new GeometryModel3D(sectionMeshBuilder.ToMesh(),
                 MaterialHelper.CreateMaterial(leftImageBrush)));
@@ -155,13 +161,14 @@ namespace HQF.HelixViewport3D.Cube
             sectionMeshBuilder.AddRectangularMesh(
                 new[]
                 {
-                    new Point3D(Rectangle.SizeX/_maxLength, Rectangle.SizeY/_maxLength, position),
-                    new Point3D(0, Rectangle.SizeY/_maxLength, position),
-                    new Point3D(Rectangle.SizeX/_maxLength, Rectangle.SizeY/_maxLength, 0),
-                    new Point3D(0, Rectangle.SizeY/_maxLength, 0)
+                    new Point3D(_realRect3D.SizeX, _realRect3D.SizeY, position),
+                    new Point3D(0, _realRect3D.SizeY, position),
+                    new Point3D(_realRect3D.SizeX, _realRect3D.SizeY, 0),
+                    new Point3D(0, _realRect3D.SizeY, 0)
                 }, 2);
 
-            leftImageBrush = ClipImageBrush(RightBrush, new Rect(0, currentPosition, Rectangle.SizeX/_maxLength, position));
+            leftImageBrush = ClipImageBrush(RightBrush,
+                new Rect(0, currentPosition, 1, 1 - currentPosition));
             var bgBrush = FilpAndRotateImageBrush(leftImageBrush);
             plotModel.Children.Add(new GeometryModel3D(sectionMeshBuilder.ToMesh(),
                 MaterialHelper.CreateMaterial(bgBrush)));
@@ -171,15 +178,15 @@ namespace HQF.HelixViewport3D.Cube
             #region Front
 
             var frontImageBrush = ClipImageBrush(FrontBrush,
-                new Rect(0, currentPosition, Rectangle.SizeX/_maxLength, position));
+                new Rect(0, currentPosition, 1, 1 - currentPosition));
             sectionMeshBuilder = new MeshBuilder();
             sectionMeshBuilder.AddRectangularMesh(
                 new[]
                 {
-                    new Point3D(Rectangle.SizeX/_maxLength, 0, position),
-                    new Point3D(Rectangle.SizeX/_maxLength, Rectangle.SizeY/_maxLength, position),
-                    new Point3D(Rectangle.SizeX/_maxLength, 0, 0),
-                    new Point3D(Rectangle.SizeX/_maxLength, Rectangle.SizeY/_maxLength, 0)
+                    new Point3D(_realRect3D.SizeX, 0, position),
+                    new Point3D(_realRect3D.SizeX, _realRect3D.SizeY, position),
+                    new Point3D(_realRect3D.SizeX, 0, 0),
+                    new Point3D(_realRect3D.SizeX, _realRect3D.SizeY, 0)
                 }, 2);
             plotModel.Children.Add(new GeometryModel3D(sectionMeshBuilder.ToMesh(),
                 MaterialHelper.CreateMaterial(frontImageBrush)));
@@ -188,14 +195,14 @@ namespace HQF.HelixViewport3D.Cube
             sectionMeshBuilder.AddRectangularMesh(
                 new[]
                 {
-                    new Point3D(0, Rectangle.SizeY/_maxLength, position),
+                    new Point3D(0, _realRect3D.SizeY, position),
                     new Point3D(0, 0, position),
-                    new Point3D(0, Rectangle.SizeY/_maxLength, 0),
+                    new Point3D(0, _realRect3D.SizeY, 0),
                     new Point3D(0, 0, 0)
                 }, 2);
 
             frontImageBrush = ClipImageBrush(BackBrush,
-                new Rect(0, currentPosition, Rectangle.SizeX/_maxLength, position));
+                new Rect(0, currentPosition, 1, 1 - currentPosition));
             bgBrush = FilpAndRotateImageBrush(frontImageBrush);
             plotModel.Children.Add(new GeometryModel3D(sectionMeshBuilder.ToMesh(),
                 MaterialHelper.CreateMaterial(bgBrush)));
@@ -207,19 +214,18 @@ namespace HQF.HelixViewport3D.Cube
         {
             #region Top
 
-            var position = currentPosition;
-            var topImageBrush = ClipImageBrush(TopBrush, new Rect(position, 0
-                , (Rectangle.SizeY / _maxLength)-currentPosition, Rectangle.SizeX / _maxLength));
+            var position = currentPosition * _realRect3D.SizeY;
+            var topImageBrush = ClipImageBrush(TopBrush, new Rect(currentPosition, 0
+                , 1 - currentPosition, 1));
 
             var sectionMeshBuilder = new MeshBuilder();
             sectionMeshBuilder.AddRectangularMesh(
                 new[]
                 {
-                     new Point3D(0, position, Rectangle.SizeZ/_maxLength),
-                    new Point3D(0,Rectangle.SizeY/_maxLength, Rectangle.SizeZ/_maxLength),
-                    new Point3D(Rectangle.SizeX/_maxLength, position, Rectangle.SizeZ/_maxLength),
-                    new Point3D(Rectangle.SizeX/_maxLength, Rectangle.SizeY/_maxLength, Rectangle.SizeZ/_maxLength)
-                   
+                    new Point3D(0, position, _realRect3D.SizeZ),
+                    new Point3D(0, _realRect3D.SizeY, _realRect3D.SizeZ),
+                    new Point3D(_realRect3D.SizeX, position, _realRect3D.SizeZ),
+                    new Point3D(_realRect3D.SizeX, _realRect3D.SizeY, _realRect3D.SizeZ)
                 }, 2);
             plotModel.Children.Add(new GeometryModel3D(sectionMeshBuilder.ToMesh(),
                 MaterialHelper.CreateMaterial(topImageBrush)));
@@ -228,14 +234,14 @@ namespace HQF.HelixViewport3D.Cube
             sectionMeshBuilder.AddRectangularMesh(
                 new[]
                 {
-                    new Point3D(Rectangle.SizeX/_maxLength, position, 0),
-                    new Point3D(Rectangle.SizeX/_maxLength, Rectangle.SizeY/_maxLength, 0),
+                    new Point3D(_realRect3D.SizeX, position, 0),
+                    new Point3D(_realRect3D.SizeX, _realRect3D.SizeY, 0),
                     new Point3D(0, position, 0),
-                    new Point3D(0, Rectangle.SizeY/_maxLength, 0)
+                    new Point3D(0, _realRect3D.SizeY, 0)
                 }, 2);
 
-            topImageBrush = ClipImageBrush(BottomBrush, new Rect(position, 0
-                , (Rectangle.SizeY / _maxLength) - currentPosition, Rectangle.SizeX / _maxLength));
+            topImageBrush = ClipImageBrush(BottomBrush, new Rect(currentPosition, 0
+                , 1 - currentPosition, 1));
 
             var bgBrush = topImageBrush;
             bgBrush = FilpImageBrush(bgBrush);
@@ -246,17 +252,17 @@ namespace HQF.HelixViewport3D.Cube
 
             #region Front
 
-            var frontImageBrush = ClipImageBrush(FrontBrush, new Rect(position, 0
-                , (Rectangle.SizeY / _maxLength) - currentPosition, Rectangle.SizeZ/_maxLength));
+            var frontImageBrush = ClipImageBrush(FrontBrush, new Rect(currentPosition, 0
+                , (1 - currentPosition), 1));
+
             sectionMeshBuilder = new MeshBuilder();
             sectionMeshBuilder.AddRectangularMesh(
                 new[]
                 {
-                    new Point3D(Rectangle.SizeX/_maxLength, position, Rectangle.SizeZ/_maxLength),
-                    new Point3D(Rectangle.SizeX/_maxLength, Rectangle.SizeY/_maxLength, Rectangle.SizeZ/_maxLength),
-                    new Point3D(Rectangle.SizeX/_maxLength, position, 0),
-                    new Point3D(Rectangle.SizeX/_maxLength, Rectangle.SizeY/_maxLength, 0)
-                    
+                    new Point3D(_realRect3D.SizeX, position, _realRect3D.SizeZ),
+                    new Point3D(_realRect3D.SizeX, _realRect3D.SizeY, _realRect3D.SizeZ),
+                    new Point3D(_realRect3D.SizeX, position, 0),
+                    new Point3D(_realRect3D.SizeX, _realRect3D.SizeY, 0)
                 }, 2);
             plotModel.Children.Add(new GeometryModel3D(sectionMeshBuilder.ToMesh(),
                 MaterialHelper.CreateMaterial(frontImageBrush)));
@@ -265,15 +271,14 @@ namespace HQF.HelixViewport3D.Cube
             sectionMeshBuilder.AddRectangularMesh(
                 new[]
                 {
-                    new Point3D(0, Rectangle.SizeY/_maxLength, Rectangle.SizeZ/_maxLength),
-                    new Point3D(0, position, Rectangle.SizeZ/_maxLength),
-                    new Point3D(0,Rectangle.SizeY/_maxLength, 0),
+                    new Point3D(0, _realRect3D.SizeY, _realRect3D.SizeZ),
+                    new Point3D(0, position, _realRect3D.SizeZ),
+                    new Point3D(0, _realRect3D.SizeY, 0),
                     new Point3D(0, position, 0)
-                    
                 }, 2);
 
-            frontImageBrush = ClipImageBrush(BackBrush, new Rect(position, 0
-                , (Rectangle.SizeY / _maxLength) - currentPosition, Rectangle.SizeZ / _maxLength));
+            frontImageBrush = ClipImageBrush(BackBrush, new Rect(currentPosition, 0
+                , 1 - currentPosition, 1));
 
             bgBrush = FilpAndRotateImageBrush(frontImageBrush);
             plotModel.Children.Add(new GeometryModel3D(sectionMeshBuilder.ToMesh(),
@@ -284,49 +289,52 @@ namespace HQF.HelixViewport3D.Cube
 
         #region denpendcy propeties
 
-        // Using a DependencyProperty as the backing store for Rectangle.  This enables animation, styling, binding, etc...
+        // Using a DependencyProperty as the backing store for _realRect3D.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty RectangleProperty =
-            DependencyProperty.Register("Rectangle", typeof (Rect3D), typeof (Section3DVisual3D),
+            DependencyProperty.Register("Rectangle", typeof(Rect3D), typeof(Section3DVisual3D),
                 new PropertyMetadata(new Rect3D(0, 0, 0, 1, 1, 1), ModelChanged));
 
         // Using a DependencyProperty as the backing store for SectionPosition.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty SectionPositionProperty =
-            DependencyProperty.Register("SectionPosition", typeof (double), typeof (Section3DVisual3D),
+            DependencyProperty.Register("SectionPosition", typeof(double), typeof(Section3DVisual3D),
                 new PropertyMetadata(0.0, ModelChanged));
 
         // Using a DependencyProperty as the backing store for SectionBrush.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty SectionBrushProperty =
-            DependencyProperty.Register("SectionBrush", typeof (sysMedia.Brush), typeof (Section3DVisual3D),
+            DependencyProperty.Register("SectionBrush", typeof(sysMedia.Brush), typeof(Section3DVisual3D),
                 new PropertyMetadata(sysMedia.Brushes.Red, ModelChanged));
 
         // Using a DependencyProperty as the backing store for SectionBrush.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty LeftBrushProperty =
-            DependencyProperty.Register("LeftBrush", typeof (sysMedia.Brush), typeof (Section3DVisual3D),
+            DependencyProperty.Register("LeftBrush", typeof(sysMedia.Brush), typeof(Section3DVisual3D),
                 new PropertyMetadata(sysMedia.Brushes.Blue, ModelChanged));
 
         public static readonly DependencyProperty TopBrushProperty =
-            DependencyProperty.Register("TopBrushBrush", typeof (sysMedia.Brush), typeof (Section3DVisual3D),
+            DependencyProperty.Register("TopBrush", typeof(sysMedia.Brush), typeof(Section3DVisual3D),
                 new PropertyMetadata(sysMedia.Brushes.Green, ModelChanged));
 
         public static readonly DependencyProperty FrontBrushProperty =
-            DependencyProperty.Register("FrontBrush", typeof (sysMedia.Brush), typeof (Section3DVisual3D),
+            DependencyProperty.Register("FrontBrush", typeof(sysMedia.Brush), typeof(Section3DVisual3D),
                 new PropertyMetadata(sysMedia.Brushes.DarkCyan, ModelChanged));
 
         public static readonly DependencyProperty RightBrushProperty =
-            DependencyProperty.Register("RightBrush", typeof (sysMedia.Brush), typeof (Section3DVisual3D),
+            DependencyProperty.Register("RightBrush", typeof(sysMedia.Brush), typeof(Section3DVisual3D),
                 new PropertyMetadata(sysMedia.Brushes.DarkOliveGreen, ModelChanged));
 
         public static readonly DependencyProperty BackBrushProperty =
-            DependencyProperty.Register("BackBrush", typeof (sysMedia.Brush), typeof (Section3DVisual3D),
+            DependencyProperty.Register("BackBrush", typeof(sysMedia.Brush), typeof(Section3DVisual3D),
                 new PropertyMetadata(sysMedia.Brushes.DodgerBlue, ModelChanged));
 
         public static readonly DependencyProperty BottomBrushProperty =
-            DependencyProperty.Register("BottomBrush", typeof (sysMedia.Brush), typeof (Section3DVisual3D),
+            DependencyProperty.Register("BottomBrush", typeof(sysMedia.Brush), typeof(Section3DVisual3D),
                 new PropertyMetadata(sysMedia.Brushes.DarkSalmon, ModelChanged));
 
         public static readonly DependencyProperty CurrentDirectionProperty =
-            DependencyProperty.Register("CurrentDirection", typeof (FrameDirection), typeof (Section3DVisual3D),
+            DependencyProperty.Register("CurrentDirection", typeof(FrameDirection), typeof(Section3DVisual3D),
                 new PropertyMetadata(FrameDirection.Left, ModelChanged));
+
+        private double _maxCount;
+        private Rect3D _realRect3D;
 
         #endregion
 
@@ -340,65 +348,61 @@ namespace HQF.HelixViewport3D.Cube
 
         public Rect3D Rectangle
         {
-            get { return (Rect3D) GetValue(RectangleProperty); }
-            set
-            {
-                SetValue(RectangleProperty, value);
-                _maxLength = Math.Max(Math.Max(value.SizeX, value.SizeY), value.SizeZ);
-            }
+            get { return (Rect3D)GetValue(RectangleProperty); }
+            set { SetValue(RectangleProperty, value); }
         }
 
         public double SectionPosition
         {
-            get { return (double) GetValue(SectionPositionProperty); }
+            get { return (double)GetValue(SectionPositionProperty); }
             set { SetValue(SectionPositionProperty, value); }
         }
 
         public sysMedia.Brush SectionBrush
         {
-            get { return (sysMedia.Brush) GetValue(SectionBrushProperty); }
+            get { return (sysMedia.Brush)GetValue(SectionBrushProperty); }
             set { SetValue(SectionBrushProperty, value); }
         }
 
         public sysMedia.Brush LeftBrush
         {
-            get { return (sysMedia.Brush) GetValue(LeftBrushProperty); }
+            get { return (sysMedia.Brush)GetValue(LeftBrushProperty); }
             set { SetValue(LeftBrushProperty, value); }
         }
 
         public sysMedia.Brush TopBrush
         {
-            get { return (sysMedia.Brush) GetValue(TopBrushProperty); }
+            get { return (sysMedia.Brush)GetValue(TopBrushProperty); }
             set { SetValue(TopBrushProperty, value); }
         }
 
         public sysMedia.Brush FrontBrush
         {
-            get { return (sysMedia.Brush) GetValue(FrontBrushProperty); }
+            get { return (sysMedia.Brush)GetValue(FrontBrushProperty); }
             set { SetValue(FrontBrushProperty, value); }
         }
 
         public sysMedia.Brush RightBrush
         {
-            get { return (sysMedia.Brush) GetValue(RightBrushProperty); }
+            get { return (sysMedia.Brush)GetValue(RightBrushProperty); }
             set { SetValue(RightBrushProperty, value); }
         }
 
         public sysMedia.Brush BackBrush
         {
-            get { return (sysMedia.Brush) GetValue(BackBrushProperty); }
+            get { return (sysMedia.Brush)GetValue(BackBrushProperty); }
             set { SetValue(BackBrushProperty, value); }
         }
 
         public sysMedia.Brush BottomBrush
         {
-            get { return (sysMedia.Brush) GetValue(BottomBrushProperty); }
+            get { return (sysMedia.Brush)GetValue(BottomBrushProperty); }
             set { SetValue(BottomBrushProperty, value); }
         }
 
         public FrameDirection CurrentDirection
         {
-            get { return (FrameDirection) GetValue(CurrentDirectionProperty); }
+            get { return (FrameDirection)GetValue(CurrentDirectionProperty); }
             set { SetValue(CurrentDirectionProperty, value); }
         }
 
@@ -449,7 +453,7 @@ namespace HQF.HelixViewport3D.Cube
 
             if (imgBrush != null)
             {
-                imgBrush.Viewbox = regionRect;
+                imgBrush.Viewbox = regionRect;//ToDo: need to consider the image is not a square.
                 return imgBrush;
             }
 
@@ -458,9 +462,11 @@ namespace HQF.HelixViewport3D.Cube
 
         private Rect3D GetSampleImageBox()
         {
-            _maxLength = Math.Max(Math.Max(Rectangle.SizeX, Rectangle.SizeY), Rectangle.SizeZ);
-            var sampleImageBox = new Rect3D(0, 0, 0, Rectangle.SizeX/_maxLength, Rectangle.SizeY/_maxLength,
-                Rectangle.SizeZ/_maxLength);
+            var maxLength = Math.Max(Math.Max(Rectangle.SizeX, Rectangle.SizeY), Rectangle.SizeZ);
+
+            var sampleImageBox = new Rect3D(0, 0, 0, Rectangle.SizeX / maxLength, Rectangle.SizeY / maxLength,
+                Rectangle.SizeZ / maxLength);
+
             return sampleImageBox;
         }
 
@@ -525,17 +531,17 @@ namespace HQF.HelixViewport3D.Cube
 
         private void CreateFrontMaxSlice(Model3DGroup plotModel)
         {
-            CreateFrontSlice(plotModel, BackBrush, Rectangle.SizeZ/_maxLength);
+            CreateFrontSlice(plotModel, BackBrush, 1);
         }
 
         private void CreateTopMaxSlice(Model3DGroup plotModel)
         {
-            CreateTopSlice(plotModel, BottomBrush, Rectangle.SizeX/_maxLength);
+            CreateTopSlice(plotModel, BottomBrush, 1);
         }
 
         private void CreateLeftMaxSlice(Model3DGroup plotModel)
         {
-            CreateLeftSlice(plotModel, RightBrush, Rectangle.SizeY/_maxLength);
+            CreateLeftSlice(plotModel, RightBrush, 1);
         }
 
         /// <summary>
@@ -546,15 +552,15 @@ namespace HQF.HelixViewport3D.Cube
         /// <param name="currentPosition"></param>
         private void CreateFrontSlice(Model3DGroup plotModel, sysMedia.Brush brush, double currentPosition)
         {
-            var position = Rectangle.SizeX/_maxLength - currentPosition;
+            var position = _realRect3D.SizeX * (1 - currentPosition);
             var sectionMeshBuilder = new MeshBuilder();
             sectionMeshBuilder.AddRectangularMesh(
                 new[]
                 {
-                    new Point3D(position, 0, Rectangle.SizeZ/_maxLength),
-                    new Point3D(position, Rectangle.SizeY/_maxLength, Rectangle.SizeZ/_maxLength),
+                    new Point3D(position, 0, _realRect3D.SizeZ),
+                    new Point3D(position, _realRect3D.SizeY, _realRect3D.SizeZ),
                     new Point3D(position, 0, 0),
-                    new Point3D(position, Rectangle.SizeY/_maxLength, 0)
+                    new Point3D(position, _realRect3D.SizeY, 0)
                 }, 2);
             plotModel.Children.Add(new GeometryModel3D(sectionMeshBuilder.ToMesh(),
                 MaterialHelper.CreateMaterial(brush)));
@@ -563,9 +569,9 @@ namespace HQF.HelixViewport3D.Cube
             sectionMeshBuilder.AddRectangularMesh(
                 new[]
                 {
-                    new Point3D(position, Rectangle.SizeY/_maxLength, Rectangle.SizeZ/_maxLength),
-                    new Point3D(position, 0, Rectangle.SizeZ/_maxLength),
-                    new Point3D(position, Rectangle.SizeY/_maxLength, 0),
+                    new Point3D(position, _realRect3D.SizeY, _realRect3D.SizeZ),
+                    new Point3D(position, 0, _realRect3D.SizeZ),
+                    new Point3D(position, _realRect3D.SizeY, 0),
                     new Point3D(position, 0, 0)
                 }, 2);
 
@@ -583,15 +589,15 @@ namespace HQF.HelixViewport3D.Cube
         /// <param name="currentPosition"></param>
         private void CreateTopSlice(Model3DGroup plotModel, sysMedia.Brush brush, double currentPosition)
         {
-            var position = Rectangle.SizeZ/_maxLength - currentPosition;
+            var position = _realRect3D.SizeZ * (1 - currentPosition);
             var sectionMeshBuilder = new MeshBuilder();
             sectionMeshBuilder.AddRectangularMesh(
                 new[]
                 {
                     new Point3D(0, 0, position),
-                    new Point3D(0, Rectangle.SizeY/_maxLength, position),
-                    new Point3D(Rectangle.SizeX/_maxLength, 0, position),
-                    new Point3D(Rectangle.SizeX/_maxLength, Rectangle.SizeY/_maxLength, position)
+                    new Point3D(0, _realRect3D.SizeY, position),
+                    new Point3D(_realRect3D.SizeX, 0, position),
+                    new Point3D(_realRect3D.SizeX, _realRect3D.SizeY, position)
                 }, 2);
             plotModel.Children.Add(new GeometryModel3D(sectionMeshBuilder.ToMesh(),
                 MaterialHelper.CreateMaterial(brush)));
@@ -600,10 +606,10 @@ namespace HQF.HelixViewport3D.Cube
             sectionMeshBuilder.AddRectangularMesh(
                 new[]
                 {
-                    new Point3D(0, Rectangle.SizeY/_maxLength, position),
+                    new Point3D(0, _realRect3D.SizeY, position),
                     new Point3D(0, 0, position),
-                    new Point3D(Rectangle.SizeX/_maxLength, Rectangle.SizeY/_maxLength, position),
-                    new Point3D(Rectangle.SizeX/_maxLength, 0, position)
+                    new Point3D(_realRect3D.SizeX, _realRect3D.SizeY, position),
+                    new Point3D(_realRect3D.SizeX, 0, position)
                 }, 2);
 
             var bgBrush = FilpAndRotateImageBrush(brush);
@@ -619,15 +625,15 @@ namespace HQF.HelixViewport3D.Cube
         /// <param name="currentPosition"></param>
         private void CreateLeftSlice(Model3DGroup plotModel, sysMedia.Brush brush, double currentPosition)
         {
-            var position = currentPosition;
+            var position = currentPosition * _realRect3D.SizeY;
             var sectionMeshBuilder = new MeshBuilder();
             sectionMeshBuilder.AddRectangularMesh(
                 new[]
                 {
-                    new Point3D(0, position, Rectangle.SizeZ/_maxLength),
-                    new Point3D(Rectangle.SizeX/_maxLength, position, Rectangle.SizeZ/_maxLength),
+                    new Point3D(0, position, _realRect3D.SizeZ),
+                    new Point3D(_realRect3D.SizeX, position, _realRect3D.SizeZ),
                     new Point3D(0, position, 0),
-                    new Point3D(Rectangle.SizeX/_maxLength, position, 0)
+                    new Point3D(_realRect3D.SizeX, position, 0)
                 }, 2);
             plotModel.Children.Add(new GeometryModel3D(sectionMeshBuilder.ToMesh(),
                 MaterialHelper.CreateMaterial(brush)));
@@ -636,9 +642,9 @@ namespace HQF.HelixViewport3D.Cube
             sectionMeshBuilder.AddRectangularMesh(
                 new[]
                 {
-                    new Point3D(Rectangle.SizeX/_maxLength, position, Rectangle.SizeZ/_maxLength),
-                    new Point3D(0, position, Rectangle.SizeZ/_maxLength),
-                    new Point3D(Rectangle.SizeX/_maxLength, position, 0),
+                    new Point3D(_realRect3D.SizeX, position, _realRect3D.SizeZ),
+                    new Point3D(0, position, _realRect3D.SizeZ),
+                    new Point3D(_realRect3D.SizeX, position, 0),
                     new Point3D(0, position, 0)
                 }, 2);
 
@@ -650,7 +656,8 @@ namespace HQF.HelixViewport3D.Cube
         #endregion Create all facets
     }
 
-    public enum FrameDirection
+
+public enum FrameDirection
     {
         Front,
         Top,

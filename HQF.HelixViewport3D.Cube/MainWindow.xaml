@@ -27,7 +27,9 @@
                 <ComboBox Name="myComboBox" SelectedIndex="0" Width="80"
                           ItemsSource="{Binding Source={StaticResource DirectionValues} }"
                           SelectedItem="{Binding  ElementName=sectionVisual,Path=CurrentDirection}" Margin="4" />
-                <Slider x:Name="slider" Maximum="1" SmallChange="0.001" Width="300" Margin="4" />
+                <Slider x:Name="slider" Maximum="0.25" Minimum="0"
+                        SmallChange="0.001" Width="300" Margin="4" />
+                <TextBox Text="{Binding ElementName=slider,Path=Value,Mode=TwoWay}" Width="30"/>
             </WrapPanel>
 
         </StackPanel>
@@ -41,9 +43,9 @@
                     <AmbientLight Color="White" />
                 </ModelVisual3D.Content>
             </ModelVisual3D>
-            <cube:Section3DVisual3D x:Name="sectionVisual" Rectangle="0,0,0,100,100,100"
+            <cube:Section3DVisual3D x:Name="sectionVisual" Rectangle="0,0,0,100,200,400"
                                      SectionPosition="{Binding Value, ElementName=slider}"
-                                     CurrentDirection="Left">
+                                     CurrentDirection="Front">
                 <cube:Section3DVisual3D.SectionBrush>
                     <ImageBrush ImageSource="Resources/thumb.jpg" />
                 </cube:Section3DVisual3D.SectionBrush>
